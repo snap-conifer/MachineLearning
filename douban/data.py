@@ -90,5 +90,5 @@ if __name__ == "__main__":
             x.append(k.replace("_"," "))
             y1.append(v.get("good")+1)
             y2.append(v.get("bad")+1)
-    save_r_a_s(x,y1,y2,"result/runtime_and_star.png")
+    save_r_a_s(x,y1,y2,"result/runtime_and_star.jpg")
     print("Finish-----Runtime and star")
