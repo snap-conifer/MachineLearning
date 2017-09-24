@@ -28,15 +28,11 @@ class recommender:
     #k：表示得出最相近的k的近邻
     #metric：表示使用计算相似度的方法
     #n：表示推荐book的个数
-    def __init__(self, data, k=3, metric='pearson', n=1):
+    def __init__(self, data, k=3, n=1):
         self.k = k
         self.n = n
         self.username2id = {}
         self.userid2name = {}
-
-        self.metric = metric
-        if self.metric == 'pearson':
-            self.fn = self.pearson
         if type(data).__name__ == 'dict':
             self.data = data
       
@@ -70,26 +66,24 @@ class recommender:
             numerator = sum_xy - (sum_x * sum_y) / n
             return numerator / denominator
     
-    def computeNearestNeighbor(self, username):
+    def neighbors(self, username):
         distances = []
         for key in self.data:
             if key != username:
-                distance = self.fn(self.data[username],self.data[key])
+                distance = self.pearson(self.data[username],self.data[key])
                 distances.append((key, distance))
 
         distances.sort(key=lambda artistTuple: artistTuple[1],reverse=True)
         return distances
     
     #推荐算法的主体函数
-    def recommend(self, user):
+    def recommend_to_user(self, user):
         #定义一个字典，用来存储推荐的书单和分数
         recommendations = {}
         #计算出user与所有其他用户的相似度，返回一个list
-        nearest = self.computeNearestNeighbor(user)
-#         print nearest
-        
+        nearest = self.neighbors(user)
         userRatings = self.data[user]
-#         print userRatings
+        
         totalDistance = 0.0
         #得住最近的k个近邻的总距离
         for i in range(self.k):
@@ -116,16 +110,15 @@ class recommender:
         # convert dict to list
         recommendations = list(recommendations.items())
         
-        #做了一个排序
+        # sort from big to small
         recommendations.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
 
-#         print recommendations[:self.n],"-------"
         return recommendations[:self.n]
 
 def recommend_bookid_to_user(username):
     bookid_list = []
     r = recommender(users)
-    bookid_and_weight = r.recommend(username)
+    bookid_and_weight = r.recommend_to_user(username)
     print ("Recommend bookid and weight:",bookid_and_weight)
     for i in range(len(bookid_and_weight)):
         bookid_list.append(bookid_and_weight[i][0])
