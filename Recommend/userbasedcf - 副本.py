@@ -1,18 +1,22 @@
-#-*-coding:utf-8-*-
-'''
-Created on 2016年5月2日
-
-@author: Gamer Think
-'''
 import pdb
+import csv
 from math import sqrt
 
+rows = []
+csvFile = open('user_book.csv', 'r')
+reader = csv.reader(csvFile)
+for row in reader:
+     rows.append(row)
+rows.remove(rows[0]) #remove 1st row
+print("rows:\n%s\n" % rows)
+csvFile.close()
+
 users = {}
-for line in open("uid_score_bid.txt"):
-    lines = line.strip().split(",")
-    if lines[0] not in users:
-        users[lines[0]] = {}
-    users[lines[0]][lines[2]]=float(lines[1])
+for row in rows:
+     if row[0] not in users:        
+          users[row[0]] = {}
+     users[row[0]][row[2]] = float(row[1])
+print("users:\n%s\n" % users)
 
 
 #----------------新增代码段END----------------------
@@ -38,18 +42,18 @@ class recommender:
       
 
     #定义的计算相似度的公式，用的是皮尔逊相关系数计算方法
-    def pearson(self, rating1, rating2):
+    def pearson(self, bookdict1, bookdict2):
         sum_xy = 0
         sum_x = 0
         sum_y = 0
         sum_xx = 0
         sum_yy = 0
         n = 0
-        for key in rating1:
-            if key in rating2:
+        for key in bookdict1:
+            if key in bookdict2:
                 n += 1
-                x = rating1[key]
-                y = rating2[key]
+                x = bookdict1[key]
+                y = bookdict2[key]
                 sum_xy += x * y
                 sum_x += x
                 sum_y += y
@@ -68,10 +72,10 @@ class recommender:
     
     def computeNearestNeighbor(self, username):
         distances = []
-        for instance in self.data:
-            if instance != username:
-                distance = self.fn(self.data[username],self.data[instance])
-                distances.append((instance, distance))
+        for key in self.data:
+            if key != username:
+                distance = self.fn(self.data[username],self.data[key])
+                distances.append((key, distance))
 
         distances.sort(key=lambda artistTuple: artistTuple[1],reverse=True)
         return distances
@@ -118,16 +122,14 @@ class recommender:
 #         print recommendations[:self.n],"-------"
         return recommendations[:self.n]
 
-def adjustrecommend(id):
+def recommend_bookid_to_user(username):
     bookid_list = []
     r = recommender(users)
-    print ("用户id:",id)
-    target_user = "Li Si"
-    k = r.recommend("%s" % target_user)
-    print ("推荐book:",k)
-    for i in range(len(k)):
-        bookid_list.append(k[i][0])
-    print (bookid_list)
+    bookid_and_weight = r.recommend(username)
+    print ("Recommend bookid and weight:",bookid_and_weight)
+    for i in range(len(bookid_and_weight)):
+        bookid_list.append(bookid_and_weight[i][0])
+    print ("Recommend bookid: ", bookid_list)
         
 if __name__ == '__main__':
-   adjustrecommend(2)
+   recommend_bookid_to_user("Li Si")
