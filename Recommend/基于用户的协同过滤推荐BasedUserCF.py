@@ -6,11 +6,8 @@ Created on 2016年5月2日
 '''
 import pdb
 from math import sqrt
-pdb.set_trace()
-fp = open("uid_score_bid.txt","r")
 
 users = {}
-
 for line in open("uid_score_bid.txt"):
     lines = line.strip().split(",")
     if lines[0] not in users:
@@ -27,12 +24,11 @@ class recommender:
     #k：表示得出最相近的k的近邻
     #metric：表示使用计算相似度的方法
     #n：表示推荐book的个数
-    def __init__(self, data, k=3, metric='pearson', n=10):
+    def __init__(self, data, k=3, metric='pearson', n=1):
         self.k = k
         self.n = n
         self.username2id = {}
         self.userid2name = {}
-        self.productid2name = {}
 
         self.metric = metric
         if self.metric == 'pearson':
@@ -40,12 +36,6 @@ class recommender:
         if type(data).__name__ == 'dict':
             self.data = data
       
-    def convertProductID2name(self, id):
-
-        if id in self.productid2name:
-            return self.productid2name[id]
-        else:
-            return id
 
     #定义的计算相似度的公式，用的是皮尔逊相关系数计算方法
     def pearson(self, rating1, rating2):
@@ -105,25 +95,22 @@ class recommender:
             
         #将与user最相近的k个人中user没有看过的书推荐给user，并且这里又做了一个分数的计算排名
         for i in range(self.k):
-            
             #第i个人的与user的相似度，转换到[0,1]之间
             weight = nearest[i][1] / totalDistance
             
             #第i个人的name
             name = nearest[i][0]
-
             #第i个用户看过的书和相应的打分
             neighborRatings = self.data[name]
-            pdb.set_trace()
-            for artist in neighborRatings:
-                if not artist in userRatings:
-                    if artist not in recommendations:
-                        recommendations[artist] = (neighborRatings[artist] * weight)
+            for bookid in neighborRatings:
+                if not bookid in userRatings:
+                    if bookid not in recommendations:
+                        recommendations[bookid] = (neighborRatings[bookid] * weight)
                     else:
-                        recommendations[artist] = (recommendations[artist]+ neighborRatings[artist] * weight)
-
+                        recommendations[bookid] += neighborRatings[bookid] * weight
+                        
+        # convert dict to list
         recommendations = list(recommendations.items())
-        recommendations = [(self.convertProductID2name(k), v)for (k, v) in recommendations]
         
         #做了一个排序
         recommendations.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
@@ -132,11 +119,11 @@ class recommender:
         return recommendations[:self.n]
 
 def adjustrecommend(id):
-    pdb.set_trace()
     bookid_list = []
     r = recommender(users)
     print ("用户id:",id)
-    k = r.recommend("%s" % "changanamei")
+    target_user = "Li Si"
+    k = r.recommend("%s" % target_user)
     print ("推荐book:",k)
     for i in range(len(k)):
         bookid_list.append(k[i][0])
