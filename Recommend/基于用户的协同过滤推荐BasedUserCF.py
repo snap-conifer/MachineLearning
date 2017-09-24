@@ -6,7 +6,7 @@ Created on 2016年5月2日
 '''
 import pdb
 from math import sqrt
-
+pdb.set_trace()
 fp = open("uid_score_bid.txt","r")
 
 users = {}
