@@ -19,20 +19,13 @@ for row in rows:
 print("users:\n%s\n" % users)
 
 
-#----------------新增代码段END----------------------
-
-
-
 class recommender:
     #data：数据集，这里指users
     #k：表示得出最相近的k的近邻
-    #metric：表示使用计算相似度的方法
-    #n：表示推荐book的个数
-    def __init__(self, data, k=3, n=1):
+    #cnt：表示推荐book的个数
+    def __init__(self, data, k=3, cnt=2):
         self.k = k
-        self.n = n
-        self.username2id = {}
-        self.userid2name = {}
+        self.cnt = cnt
         if type(data).__name__ == 'dict':
             self.data = data
       
@@ -77,51 +70,52 @@ class recommender:
         return distances
     
     #推荐算法的主体函数
-    def recommend_to_user(self, user):
+    def recommend_to_user(self, to_user):
+        #pdb.set_trace()
         #定义一个字典，用来存储推荐的书单和分数
-        recommendations = {}
+        recommendlist = {}
         #计算出user与所有其他用户的相似度，返回一个list
-        nearest = self.neighbors(user)
-        userRatings = self.data[user]
+        neighborlist = self.neighbors(to_user)
+        touser_bookid_score_dict = self.data[to_user]
         
         totalDistance = 0.0
         #得住最近的k个近邻的总距离
         for i in range(self.k):
-            totalDistance += nearest[i][1]
+            totalDistance += neighborlist[i][1]
         if totalDistance==0.0:
             totalDistance=1.0
             
         #将与user最相近的k个人中user没有看过的书推荐给user，并且这里又做了一个分数的计算排名
         for i in range(self.k):
             #第i个人的与user的相似度，转换到[0,1]之间
-            weight = nearest[i][1] / totalDistance
+            weight = neighborlist[i][1] / totalDistance
             
             #第i个人的name
-            name = nearest[i][0]
+            from_username = neighborlist[i][0]
             #第i个用户看过的书和相应的打分
-            neighborRatings = self.data[name]
+            neighborRatings = self.data[from_username]
             for bookid in neighborRatings:
-                if not bookid in userRatings:
-                    if bookid not in recommendations:
-                        recommendations[bookid] = (neighborRatings[bookid] * weight)
+                if not bookid in touser_bookid_score_dict:
+                    if bookid not in recommendlist:
+                        recommendlist[bookid] = (neighborRatings[bookid] * weight)
                     else:
-                        recommendations[bookid] += neighborRatings[bookid] * weight
+                        recommendlist[bookid] += neighborRatings[bookid] * weight
                         
         # convert dict to list
-        recommendations = list(recommendations.items())
+        recommendlist = list(recommendlist.items())
         
         # sort from big to small
-        recommendations.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
+        recommendlist.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
 
-        return recommendations[:self.n]
+        return recommendlist[:self.cnt]
 
 def recommend_bookid_to_user(username):
     bookid_list = []
     r = recommender(users)
-    bookid_and_weight = r.recommend_to_user(username)
-    print ("Recommend bookid and weight:",bookid_and_weight)
-    for i in range(len(bookid_and_weight)):
-        bookid_list.append(bookid_and_weight[i][0])
+    bookid_and_weight_list = r.recommend_to_user(username)
+    print ("Recommend bookid and weight:",bookid_and_weight_list)
+    for i in range(len(bookid_and_weight_list)):
+        bookid_list.append(bookid_and_weight_list[i][0])
     print ("Recommend bookid: ", bookid_list)
         
 if __name__ == '__main__':
