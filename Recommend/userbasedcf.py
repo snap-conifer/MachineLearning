@@ -20,17 +20,16 @@ print("users:\n%s\n" % users)
 
 
 class recommender:
-    #data：数据集，这里指users
-    #k：表示得出最相近的k的近邻
-    #cnt：表示推荐book的个数
-    def __init__(self, data, k=3, cnt=2):
+    #k：the nearest k neighbors
+    #cnt：recommend count
+    def __init__(self, dataset, k=3, cnt=2):
         self.k = k
         self.cnt = cnt
-        if type(data).__name__ == 'dict':
-            self.data = data
+        if type(dataset).__name__ == 'dict':
+            self.dataset = dataset
       
 
-    #定义的计算相似度的公式，用的是皮尔逊相关系数计算方法
+    # pearson correlation coefficient
     def pearson(self, bookdict1, bookdict2):
         sum_xy = 0
         sum_x = 0
@@ -51,63 +50,61 @@ class recommender:
         if n == 0:
             return 0
         
-        #皮尔逊相关系数计算公式 
         denominator = sqrt(sum_xx - pow(sum_x, 2) / n)  * sqrt(sum_yy - pow(sum_y, 2) / n)
         if denominator == 0:
             return 0
         else:
             numerator = sum_xy - (sum_x * sum_y) / n
             return numerator / denominator
+
     
     def neighbors(self, username):
         distances = []
-        for key in self.data:
+        for key in self.dataset:
             if key != username:
-                distance = self.pearson(self.data[username],self.data[key])
+                distance = self.pearson(self.dataset[username],self.dataset[key])
                 distances.append((key, distance))
 
         distances.sort(key=lambda artistTuple: artistTuple[1],reverse=True)
         return distances
     
-    #推荐算法的主体函数
-    def recommend_to_user(self, to_user):
-        #pdb.set_trace()
-        #定义一个字典，用来存储推荐的书单和分数
-        recommendlist = {}
-        #计算出user与所有其他用户的相似度，返回一个list
-        neighborlist = self.neighbors(to_user)
-        touser_bookid_score_dict = self.data[to_user]
+
+    def recommend_to_user(self, user):
+        # store recommended bookid and weight
+        recommendations = {}
+        neighborlist = self.neighbors(user)
+        user_dict = self.dataset[user]
         
         totalDistance = 0.0
-        #得住最近的k个近邻的总距离
+        
+        # total distance of the nearest k neighbors
         for i in range(self.k):
             totalDistance += neighborlist[i][1]
         if totalDistance==0.0:
             totalDistance=1.0
             
-        #将与user最相近的k个人中user没有看过的书推荐给user，并且这里又做了一个分数的计算排名
+        #recommend books to to_user who never read
         for i in range(self.k):
-            #第i个人的与user的相似度，转换到[0,1]之间
             weight = neighborlist[i][1] / totalDistance
             
-            #第i个人的name
-            from_username = neighborlist[i][0]
-            #第i个用户看过的书和相应的打分
-            neighborRatings = self.data[from_username]
-            for bookid in neighborRatings:
-                if not bookid in touser_bookid_score_dict:
-                    if bookid not in recommendlist:
-                        recommendlist[bookid] = (neighborRatings[bookid] * weight)
+            neighbor_name = neighborlist[i][0]
+            #book and score of user i
+            neighborScores = self.dataset[neighbor_name]
+            for bookid in neighborScores:
+                if not bookid in user_dict:
+                    if bookid not in recommendations:
+                        recommendations[bookid] = (neighborScores[bookid] * weight)
                     else:
-                        recommendlist[bookid] += neighborRatings[bookid] * weight
+                        recommendations[bookid] += neighborScores[bookid] * weight
                         
         # convert dict to list
-        recommendlist = list(recommendlist.items())
+        print("recomend bookid and score weight:\n%s\n" % recommendations)
+        recommendations = list(recommendations.items())
         
-        # sort from big to small
-        recommendlist.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
+        # sort descending
+        recommendations.sort(key=lambda artistTuple: artistTuple[1], reverse = True)
 
-        return recommendlist[:self.cnt]
+        return recommendations[:self.cnt]
 
 def recommend_bookid_to_user(username):
     bookid_list = []
