@@ -30,21 +30,21 @@ class recommender:
       
 
     # pearson correlation coefficient
-    def pearson(self, bookdict1, bookdict2):
+    def pearson(self, touser, dataset):
         sum_xy = 0
         sum_x = 0
         sum_y = 0
         sum_xx = 0
         sum_yy = 0
         n = 0
-        for key in bookdict1:
-            if key in bookdict2:
+        for key in touser:
+            if key in dataset:
                 n += 1
-                x = bookdict1[key]
-                y = bookdict2[key]
-                sum_xy += x * y
+                x = touser[key]
+                y = dataset[key]
                 sum_x += x
                 sum_y += y
+                sum_xy += x * y
                 sum_xx += pow(x, 2)
                 sum_yy += pow(y, 2)
         if n == 0:
@@ -82,20 +82,20 @@ class recommender:
             totalDistance += neighborlist[i][1]
         if totalDistance==0.0:
             totalDistance=1.0
-            
+ 
         #recommend books to to_user who never read
         for i in range(self.k):
             weight = neighborlist[i][1] / totalDistance
             
             neighbor_name = neighborlist[i][0]
             #book and score of user i
-            neighborScores = self.dataset[neighbor_name]
-            for bookid in neighborScores:
+            neighbor_books = self.dataset[neighbor_name]
+            for bookid in neighbor_books:
                 if not bookid in user_dict:
                     if bookid not in recommendations:
-                        recommendations[bookid] = (neighborScores[bookid] * weight)
+                        recommendations[bookid] = neighbor_books[bookid] * weight
                     else:
-                        recommendations[bookid] += neighborScores[bookid] * weight
+                        recommendations[bookid] += neighbor_books[bookid] * weight
                         
         # convert dict to list
         print("recomend bookid and score weight:\n%s\n" % recommendations)
