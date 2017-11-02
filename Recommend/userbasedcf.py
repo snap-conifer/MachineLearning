@@ -113,7 +113,7 @@ def recommend_bookid_to_user(username):
     print ("Recommend bookid and weight:",bookid_and_weight_list)
     for i in range(len(bookid_and_weight_list)):
         bookid_list.append(bookid_and_weight_list[i][0])
-    print ("Recommend bookid: ", bookid_list)
+    print ("Recommended bookid: ", bookid_list)
         
 if __name__ == '__main__':
    recommend_bookid_to_user("Li Si")
