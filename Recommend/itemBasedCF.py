@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 #-*-coding:utf-8-*-
-'''
-Created on 2016-5-30
 
-@author: thinkgamer
-'''
 import math
+import pdb
 
 class ItemBasedCF:
     def __init__(self,train_file):
@@ -15,7 +12,6 @@ class ItemBasedCF:
         #读取文件，并生成用户-物品的评分表和测试集
         self.train = dict()     #用户-物品的评分表
         for line in open(self.train_file):
-            # user,item,score = line.strip().split(",")
             user,score,item = line.strip().split(",")
             self.train.setdefault(user,{})
             self.train[user][item] = int(float(score))
@@ -23,7 +19,7 @@ class ItemBasedCF:
     def ItemSimilarity(self):
         #建立物品-物品的共现矩阵
         C = dict()  #物品-物品的共现矩阵
-        N = dict()  #物品被多少个不同用户购买
+        N = dict()  #物品被多少个不同用户购买N
         for user,items in self.train.items():
             for i in items.keys():
                 N.setdefault(i,0)
@@ -46,16 +42,18 @@ class ItemBasedCF:
         rank = dict()
         action_item = self.train[user]     #用户user产生过行为的item和评分
         for item,score in action_item.items():
-            for j,wj in sorted(self.W[item].items(),key=lambda x:x[1],reverse=True)[0:K]:
+            sortedItems = sorted(self.W[item].items(),key=lambda x:x[1],reverse=True)[0:K]
+            for j,wj in sortedItems:
                 if j in action_item.keys():
                     continue
                 rank.setdefault(j,0)
                 rank[j] += score * wj
+        pdb.set_trace()
         return dict(sorted(rank.items(),key=lambda x:x[1],reverse=True)[0:N])
     
 #声明一个ItemBased推荐的对象    
-Item = ItemBasedCF("uid_score_bid.dat")
-Item.ItemSimilarity()
-recommedDic = Item.Recommend("xiyuweilan")
+item = ItemBasedCF("item_book.txt")
+item.ItemSimilarity()
+recommedDic = item.Recommend("Chen Er")
 for k,v in recommedDic.items():
     print(k,"\t",v)
