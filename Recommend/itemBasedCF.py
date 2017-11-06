@@ -35,6 +35,7 @@ class ItemBasedCF:
             self.W.setdefault(i,{})
             for j,cij in related_items.items():
                 self.W[i][j] = cij / (math.sqrt(N[i] * N[j]))
+        pdb.set_trace()
         return self.W
 
     #给用户user推荐，前K个相关用户
