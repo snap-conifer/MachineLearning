@@ -10,7 +10,8 @@ class ItemBasedCF:
         self.readData()
     def readData(self):
         #读取文件，并生成用户-物品的评分表和测试集
-        self.train = dict()     #用户-物品的评分表
+        self.train = dict()
+        #用户-物品的评分表
         for line in open(self.train_file):
             user,score,item = line.strip().split(",")
             self.train.setdefault(user,{})
@@ -35,13 +36,14 @@ class ItemBasedCF:
             self.W.setdefault(i,{})
             for j,cij in related_items.items():
                 self.W[i][j] = cij / (math.sqrt(N[i] * N[j]))
-        pdb.set_trace()
         return self.W
 
-    #给用户user推荐，前K个相关用户
+    #给用户user推荐，前K个相关用户，前N个物品
     def Recommend(self,user,K=3,N=10):
         rank = dict()
-        action_item = self.train[user]     #用户user产生过行为的item和评分
+        action_item = self.train[user]     
+        #用户user产生过行为的item和评分
+        pdb.set_trace()
         for item,score in action_item.items():
             sortedItems = sorted(self.W[item].items(),key=lambda x:x[1],reverse=True)[0:K]
             for j,wj in sortedItems:
@@ -49,12 +51,11 @@ class ItemBasedCF:
                     continue
                 rank.setdefault(j,0)
                 rank[j] += score * wj
-        pdb.set_trace()
         return dict(sorted(rank.items(),key=lambda x:x[1],reverse=True)[0:N])
     
 #声明一个ItemBased推荐的对象    
 item = ItemBasedCF("item_book.txt")
 item.ItemSimilarity()
-recommedDic = item.Recommend("Chen Er")
+recommedDic = item.Recommend("Li Si")
 for k,v in recommedDic.items():
     print(k,"\t",v)
