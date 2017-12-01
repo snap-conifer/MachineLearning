@@ -1,0 +1,5 @@
+Liu	i001	movie
+Chen	i001	movie
+Zhang	i001	movie
+Chen 	i002	music
+Zhang	i002	music
