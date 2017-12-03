@@ -1,10 +1,10 @@
 #-*-coding:utf-8-*-
 import pdb
 
-user_tags = dict()
 user_items = dict()
-tag_items = dict()
+user_tags = dict()
 item_tags = dict()
+tag_items = dict()
 
 def addValueToMat(mat, key, value):
     if key not in mat:
@@ -21,17 +21,75 @@ def InitStat():
     line = data_file.readline()
     while line:
         terms = line.split("\t")
+        print(terms)
         user = terms[0]
         item = terms[1]
         tag = terms[2]
-        
-        addValueToMat(user_tags, user, tag)
+
         addValueToMat(user_items, user, item)
-        addValueToMat(tag_items, tag, item)
+        addValueToMat(user_tags, user, tag)
         addValueToMat(item_tags, item, tag)
+        addValueToMat(tag_items, tag, item)
         
         line = data_file.readline()
-    pdb.set_trace()
+
     data_file.close()
 
+def Recommend(user):
+    recommend_list = dict()
+    tagged_item = user_items[user]
+    for tag, wut in user_tags[user].items():
+        for item, wit in tag_items[tag].items():
+            if item not in tagged_item:
+                if item not in recommend_list:
+                    recommend_list[item] = wut * wit
+                else:
+                    recommend_list[item] += wut * wit
+    return sorted(recommend_list.items(), key = lambda a:a[1], reverse = True)
+
+# 统计标签流行度
+def TagPopularity():
+    pdb.set_trace()
+    tagFreq = {}
+    for user in user_tags.keys():
+        for tag in user_tags[user].keys():
+            if tag not in tagFreq:
+                tagFreq[tag] = 1
+            else:
+                tagFreq[tag] += 1
+    return sorted(tagFreq.items(), key = lambda a:a[1], reverse = True)
+
+#计算余弦相似度
+def CosineSim(item_tags,i,j):
+    ret = 0
+    for b,wib in item_tags[i].items():     #求物品i,j的标签交集数目
+        if b in item_tags[j]:
+            ret += wib * item_tags[j][b]
+    ni = 0
+    nj = 0
+    for b, w in item_tags[i].items():      #统计 i 的标签数目
+        ni += w * w
+    for b, w in item_tags[j].items():      #统计 j 的标签数目
+        nj += w * w
+    if ret == 0:
+        return 0
+    return ret/math.sqrt(ni * nj)          #返回余弦值
+
+def Diversity(item_tags, recommend_items):
+    ret = 0
+    n = 0
+    for i in dict(recommend_items).keys():
+        for j in dict(recommend_item).keys():
+            if i == j:
+                continue
+            ret += CosineSim(item_tags, i ,j)
+            n += 1
+    return ret / (n * 1.0)
+    
 InitStat()
+
+recommend_list = Recommend("刘一")
+print(recommend_list)
+
+tagFreq = TagPopularity()
+print(tagFreq)
