@@ -1,4 +1,4 @@
-#-*-coding:utf-8-*-
+﻿#-*-coding:utf-8-*-
 import pdb
 import math
 
@@ -38,6 +38,7 @@ def InitStat():
 def Recommend(user):
     recommend_list = dict()
     tagged_item = user_items[user]
+    pdb.set_trace()
     for tag, wut in user_tags[user].items():
         for item, wit in tag_items[tag].items():
             if item not in tagged_item:
