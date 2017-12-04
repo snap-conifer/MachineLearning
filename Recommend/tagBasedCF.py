@@ -93,10 +93,10 @@ def Diversity(item_tags, recommend_items):
 InitStat()
 
 recommend_list = Recommend("刘一")
-print(recommend_list)
+print("推荐列表： %s" % recommend_list)
 
 tagFreq = TagPopularity()
-print(tagFreq)
+print("标签流行度：%s" % tagFreq)
 
 diversityNum = Diversity(item_tags, recommend_list)
-print(diversityNum)
+print("列表多样性：%s" % diversityNum)
